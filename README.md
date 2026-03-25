@@ -1,122 +1,130 @@
-# Automatic Blinds with Tri-Color Light System
+# Automatic Smart Blinds with Tri-Color Light System
 
-This project is an Arduino-based **automated blinds control system** that adjusts window blinds based on environmental conditions and user input. It integrates light sensing, temperature monitoring, motorized control, and IR remote functionality.
-
-Additionally, the system includes a **tri-color light indicator** to visually represent environmental status or system conditions.
+This project is an Arduino-based **smart blinds automation system** that adjusts window blinds based on environmental conditions such as **light intensity, temperature, and time of day**. It also includes **manual control via IR remote** and a **tri-color lighting system** for indoor illumination control.
 
 ---
 
 ## Project Overview
 
-The system is designed to:
+The system integrates multiple sensors and actuators to create a fully automated smart window solution. It controls:
 
-- automatically adjust blinds based on light intensity  
-- provide manual control via IR remote  
-- monitor temperature using a DHT sensor  
-- ensure safe movement using limit switches  
-- indicate system status using tri-color lighting  
+- horizontal blinds (left and right panels)  
+- vertical blinds (open, mid, close positions)  
+- indoor lighting (tri-color levels)  
 
-It is suitable for:
-- smart home automation  
-- energy-efficient lighting control  
-- indoor environmental monitoring  
+The system operates in both:
+- **Automatic Mode** (sensor + time-based)
+- **Manual Mode** (IR remote control)
 
 ---
 
 ## Features
 
-### ☀️ Automatic Light Tracking
-- Uses two LDR sensors (left and right)
-- Detects light direction
-- Adjusts blinds position to:
-  - maximize natural light  
-  - reduce glare  
+### ☀️ Light-Based Automation
+- Uses dual LDR sensors (left & right)
+- Detects sunlight intensity and direction
+- Automatically:
+  - opens blinds when light is low  
+  - closes blinds when light is too strong  
 
 ---
 
-### 🌡️ Temperature Monitoring
+### 🌡️ Temperature-Based Control
 - Uses **DHT22 sensor**
-- Reads ambient temperature
-- Can be used to:
-  - adjust blinds for heat control  
-  - trigger system logic  
+- Adjusts vertical blinds depending on temperature:
+  - High temp → close blinds  
+  - Medium temp → partial (middle)  
+  - Low temp → open blinds  
 
 ---
 
-### 🎮 IR Remote Control
-- Allows manual override of the system  
-- Supports commands for:
-  - opening blinds  
-  - closing blinds  
-  - adjusting position  
+### ⏰ Time-Based Logic
+- Uses **DS3231 RTC module**
+- Restricts automatic vertical adjustment to daytime (e.g., 9 AM – 5 PM)
 
 ---
 
-### 🔄 Motorized Blinds Control
+### 💡 Tri-Color Lighting System
+- Controlled via relay pulses
+- Supports multiple brightness levels:
+  - Off  
+  - Low  
+  - Medium  
+  - Bright  
 
-Controls three directions:
+Automatically adjusts lighting based on ambient light levels.
 
-- **Left motor** → horizontal adjustment  
-- **Right motor** → horizontal adjustment  
-- **Vertical motor** → opening/closing blinds  
+---
+
+### 🎮 IR Remote Control (Manual Mode)
+- Allows user to:
+  - toggle automatic/manual mode  
+  - open/close left blinds  
+  - open/close right blinds  
+  - adjust vertical blinds (up/down)  
+  - switch lighting modes  
 
 ---
 
 ### 🛑 Limit Switch Safety
-- Prevents over-rotation or damage  
-- Stops movement when:
-  - left limit reached  
-  - right limit reached  
-  - vertical limit reached  
-
----
-
-### 🚦 Tri-Color Light Indicator
-- Uses LED indicators to show system status:
-
-| Color  | Meaning                |
-|--------|------------------------|
-| Green  | Normal operation       |
-| Yellow | Adjusting / active     |
-| Red    | Limit reached / error  |
+- Prevents over-travel of motors  
+- Ensures blinds stop at:
+  - left limit  
+  - right limit  
+  - vertical limit  
 
 ---
 
 ## System Workflow
 
-### 1. Startup
-- Initializes sensors and IR receiver  
-- Sets motor pins and limit switches  
+### 1. Initialization
+- System resets blinds to default positions using limit switches  
+- Sets initial states:
+  - blinds open  
+  - lighting off  
 
 ---
 
 ### 2. Automatic Mode
-- Reads LDR values:
-  - compares left vs right light intensity  
-- Adjusts blinds direction accordingly  
+
+Runs every minute:
+- Reads:
+  - light levels (LDR)
+  - temperature (DHT22)
+  - current time (RTC)
+
+#### Light Logic
+- Bright → close blinds  
+- Medium → adjust lighting level  
+- Dark → open blinds and increase lighting  
+
+#### Temperature Logic (Daytime Only)
+- High temp → close vertical blinds  
+- Medium temp → partial position  
+- Low temp → open blinds  
 
 ---
 
 ### 3. Manual Mode (IR Remote)
-- User sends command via remote  
-- Overrides automatic behavior  
-- Controls:
-  - open / close blinds  
-  - direction movement  
+
+User can:
+- override automatic system  
+- control blinds directly  
+- change lighting mode  
 
 ---
 
-### 4. Safety Monitoring
-- Continuously checks limit switches  
-- Stops motors when limits are reached  
+### 4. Motor Control
 
----
+Three motor systems:
 
-### 5. Status Indication
-- Tri-color LED updates based on:
-  - system state  
-  - movement  
-  - errors  
+- **Left Motor** → left blinds  
+- **Right Motor** → right blinds  
+- **Vertical Motor** → tilt/open/close  
+
+Each motor:
+- moves forward/backward  
+- stops using limit switches or timing  
 
 ---
 
@@ -128,71 +136,67 @@ Controls three directions:
 | LDR Left            | A0         |
 | LDR Right           | A1         |
 | Motor Left A        | 3          |
-| Motor Left B        | 4          |
-| Motor Right A       | 5          |
-| Motor Right B       | 6          |
-| Motor Vertical A    | 7          |
-| Motor Vertical B    | 8          |
-| Limit Right         | 9          |
-| Limit Left          | 10         |
-| Limit Vertical      | 11         |
-| IR Receiver         | 13         |
+| Motor Left B        | 5          |
+| Motor Right A       | 6          |
+| Motor Right B       | 9          |
+| Motor Vertical A    | 10         |
+| Motor Vertical B    | 11         |
+| Limit Right         | 4          |
+| Limit Left          | 7          |
+| Limit Vertical      | 8          |
+| IR Receiver         | 12         |
+| Relay (Lighting)    | A2         |
+| LED Indicator       | 13         |
 
 ---
 
 ## Hardware Components
 
-- Arduino (Uno or Mega)  
-- 3x DC Motors (or motor drivers)  
-- Motor Driver Modules (L298N or similar)  
+- Arduino (Uno / Mega)  
+- 3x DC Motors (with motor drivers)  
+- L298N or similar motor driver  
 - 2x LDR Sensors  
 - DHT22 Temperature Sensor  
-- IR Receiver Module  
-- IR Remote  
-- Limit Switches (3x)  
-- Tri-color LED (RGB LED or 3 LEDs)  
+- DS3231 RTC Module  
+- IR Receiver + Remote  
+- 3x Limit Switches  
+- Relay Module (for lighting)  
+- Tri-color Light (multi-level lighting system)  
 
 ---
 
 ## Wiring Overview
 
-### LDR Sensors
-- Connected as voltage divider:
-  - LDR → Analog pin (A0, A1)  
-  - with resistor to GND  
+### Sensors
+- LDR → analog pins (A0, A1) with voltage divider  
+- DHT22 → digital pin 2  
+- RTC (DS3231) → I2C (SDA, SCL)  
 
 ---
 
 ### Motors
 - Controlled via motor driver:
-  - each motor uses two control pins (A/B)  
-- Requires external power supply  
+  - each motor uses two control pins  
+- external power required  
 
 ---
 
 ### Limit Switches
-- Connected to digital pins with **INPUT_PULLUP**
+- Connected using **INPUT_PULLUP**
 - Active LOW when triggered  
 
 ---
 
 ### IR Receiver
-- Signal → Pin 13  
+- Signal → pin 12  
 - VCC → 5V  
 - GND → GND  
 
 ---
 
-### DHT22 Sensor
-- Data → Pin 2  
-- VCC → 5V  
-- GND → GND  
-
----
-
-### Tri-Color LED
-- Connected to digital pins (not shown in code but included in system design)
-- Each color controlled independently  
+### Lighting System
+- Relay connected to pin A2  
+- Uses pulse switching to change brightness levels  
 
 ---
 
@@ -206,35 +210,35 @@ Controls three directions:
 ## Notes
 
 - Uses **Chrono library** for non-blocking timing  
-- IR control requires decoding remote values  
-- Motor control assumes proper driver circuitry  
-- Limit switches are critical for safety  
+- Light values are mapped to percentage (0–100)  
+- Relay uses pulse-based switching for tri-color lighting  
+- Automatic mode runs periodically (every 60 seconds)  
 
 ---
 
 ## Limitations
 
-- No IoT or remote monitoring (offline system)  
-- Light detection is threshold-based (no PID control)  
-- Requires calibration for LDR sensitivity  
-- IR remote depends on proper signal decoding  
+- No IoT connectivity (offline system)  
+- Light control is threshold-based  
+- Requires calibration of LDR sensors  
+- Relay-based lighting may have delay  
 
 ---
 
 ## Summary
 
-This project demonstrates a **smart automated blinds system** that combines:
+This project demonstrates a **smart blinds automation system** that combines:
 
-- environmental sensing (light + temperature)  
-- motorized control  
-- safety mechanisms (limit switches)  
-- user interaction (IR remote)  
-- visual feedback (tri-color LED)  
+- environmental sensing (light, temperature, time)  
+- motorized control (multi-axis blinds)  
+- manual override (IR remote)  
+- adaptive lighting (tri-color system)  
 
 It is suitable for:
+
 - smart home automation  
-- energy-efficient building systems  
-- embedded control applications
+- energy-efficient window systems  
+- embedded control projects  
 
 ## Wiring Diagram
 ![Wiring Diagram](images/automatic_blinds_page-0001.jpg)
