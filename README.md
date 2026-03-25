@@ -234,4 +234,7 @@ This project demonstrates a **smart automated blinds system** that combines:
 It is suitable for:
 - smart home automation  
 - energy-efficient building systems  
-- embedded control applications  
+- embedded control applications
+
+## Wiring Diagram
+![Wiring Diagram](images/automatic_blinds_page-0001.jpg)
